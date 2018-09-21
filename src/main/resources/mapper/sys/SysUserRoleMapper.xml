@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jt.sys.dao.SysUserRoleDao">
+
+    <!-- 基于角色id删除 角色和用户的关系数据 -->
+    <delete id="deleteObjectsByRoleId">
+       delete from sys_user_roles
+       where role_id=#{RoleId}
+    </delete>
+    
+    <!-- 基于用户id删除用户与角色之间的关系 -->
+    <delete id="deleteObjectsByUserId"
+          parameterType="int">
+        delete from sys_user_roles
+        where user_id=#{userId}
+    </delete>
+   
+    <!-- 
+    	使用$符号替换sql语句中的字段或者表名称
+    	使用#符号传入用户输入的值(防止sql语句注入攻击)
+    -->
+    <delete id="deleteObjectsById"
+          parameterType="int">
+        delete from sys_user_roles
+        where ${columuName}=#{Id}
+    </delete>
+    
+    <!-- 保存用户和角色关系数据 -->
+    <insert id="insertObject">
+       insert into sys_user_roles
+       (user_id,role_id)
+       values
+       <foreach collection="roleIds" separator="," item="item">
+          (#{userId},#{item})
+       </foreach>
+    </insert>
+    
+    <!-- 基于用户id查询角色id -->
+    <select id="findRoleIdsByUserId"
+    	  resultType="int">
+        select role_id
+        from sys_user_roles
+        where user_id=#{userId}
+    </select>
+    
+    
+</mapper>
+
+
+

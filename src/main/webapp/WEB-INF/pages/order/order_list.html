@@ -1,0 +1,193 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">订单列表</h3>
+				
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+						    <!-- <th><input type="checkbox" id="checkAll">全选</th> -->
+							<th>id</th>
+							<th>订单号</th>
+							<th>订单状态</th>
+							<th>收营员</th>
+							<th>数量</th>
+							<th>品项</th>
+							<th>金额</th>
+							<th>控制操作</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					</tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix">
+			      
+			</div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+
+	$(function(){
+	   //添加分页列表界面--doGetObjects(将日志表添加到界面中)
+	   $("#pageId").load("doPageUI.do",doGetObjects);
+	   
+	   $("#tbodyId")
+		   .on("click",".updateShows",doUpdateShowsObjects)
+		   .on("click",".updateOrder",doUpdateOrderObjects) 
+		   .on("click",".deleteOrder",doDeleteOrderObjects); 
+		   
+	});
+	
+	function doUpdateOrderObjects(){
+		//1.获取界面数据
+		
+		//2.跳转界面--加载数据
+		var url = "order/doOrderEditUI.do";
+		$("#mainContentId").load(url,function(){
+			$("#mainContentId").removeData(); 
+		});
+	}
+	function doDeleteOrderObjects(){
+		//console.log("数据流程运行到了--订单删除功能");
+		//1. url
+		var url = "order/doDeleteObject.do";
+		//2. 传参数
+		var id=$(this).parents("tr").data("id");
+		var params={"id":id};
+		//3. 访问服务器
+		$.post(url,params,function(result){
+		   //4. 处理结果集
+		   if(result.state==1){
+			   alert(result.message);
+			   doGetObjects();
+		   }else{
+			   alert(result.message);
+		   }
+		});
+		
+		
+	}
+	function doUpdateShowsObjects(){
+		//console.log("数据流程运行到了--订单修改(显示/隐藏)功能");
+		//1. url
+		var url = "order/doUpdateShowsById.do";
+		
+		//2. 传参数(show/id)
+		var shows = $("#mainContentId").data("show"); 
+		var id=$(this).parents("tr").data("id");
+		var params={"shows":shows,"id":id};
+		
+		//3. 访问服务器并获取返回参数
+		$.post(url,params,function(result){
+		   if(result.state==1){
+			   alert(result.message);
+			   doGetObjects();
+		   }else{
+			   alert(result.message);
+		   }
+		});
+	}
+	
+	function doGetObjects(){
+	   //1.请求参数
+	   var pageCurrent=$("#pageId").data("pageCurrent");
+	   if(!pageCurrent){
+	   	  pageCurrent=1;
+	   }   
+	   var params={"pageCurrent":pageCurrent};//"pageCurrent=1";
+	   //基于show查询
+	   var shows = $("#mainContentId").data("show"); 
+	   //console.log("show",show);
+	   params.shows=shows;
+	   //2.请求url
+	   var url = "order/doFindOrderList.do";
+	   //3.发送异步请求获取数据
+	   $.getJSON(url,params,function(result){
+		  //debugger
+		  doHandleResponseResult(result); 
+	   });
+	}
+	
+	function doHandleResponseResult(result){
+		   //console.log(result);
+		   if(result.state==1){
+			  //初始化table对象中tbody部分的内容
+			  doSetTableBodyRows(result.data.records);
+			  //初始化分页信息(如下方法定义在page.html页面)
+			  doSetPagination(result.data);
+		   }else{
+			  alert(result.message);
+		   }
+	   }
+   function doSetTableBodyRows(records){
+	   //1.获取tbody对象,并清空内容;
+	   var tBody=$("#tbodyId");
+	   tBody.empty();
+	   //2.迭代数据并将数据追加到tbody中
+	   for(var i in records){
+		  //1.创建tr对象
+		  var tr=$("<tr></tr>");
+		  tr.data("id",records[i].id);
+		  //2.创建tds对象
+		  var tds=doCreateTds(records[i]);
+		  //3.将tds追加到tr中
+		  tr.append(tds);
+		  //4.将tr追加到tbody中
+		  tBody.append(tr);
+	   }
+   }
+   function doCreateTds(data){
+	   var shows = $("#mainContentId").data("show"); 
+	   var endTd;
+	   if(shows == "true"){
+		   //订单列表--> 删除/修改(按钮)
+		   endTd = 
+			    "<td>"
+				+"<a class='updateShows'>删除</a>"
+				+" / "
+				+"<a class='updateOrder'>修改</a>"
+				+"</td>";
+	   } else {
+		   //订单回收站 --> 恢复/永久删除(按钮)
+		   endTd =
+			    "<td>"
+				+"<a class='updateShows'>恢复</a>"
+				+" / "
+				+"<a class='deleteOrder'>永久删除</a>"
+				+"</td>";
+	   }
+		var tds = 
+			"<td>"+data.id+"</td>"+
+			"<td>"+data.order_no+"</td>"+
+			"<td>"+data.order_type+"</td>"+
+			"<td>"+data.name+"</td>"+
+			"<td>"+data.num+"</td>"+
+			"<td>"+data.item+"</td>"+
+			"<td>"+data.price+"</td>"+
+			endTd;
+		return tds;	
+	}
+	
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jt.order.dao.OrderDao">
+
+	<!-- 查询所有订单信息 -->
+	<select id="findOrderAll" resultType="com.jt.order.entity.Order">
+		select * from orders where shows=#{shows} 
+		order by id 
+        limit #{startIndex},#{pageSize}
+	</select>
+	<!-- 查询所有订单信息 -->
+	<!-- 
+	<select id="findOrderAll" resultType="com.jt.order.entity.Order">
+		select * from orders where shows=#{shows} 
+		order by id desc
+        limit #{startIndex},#{pageSize}
+	</select>
+	 -->
+	
+	<!-- 根据id删除订单信息 -->
+	<delete id="deleteById">
+		delete from orders where id=#{id}
+	</delete>
+	
+	<!-- 修改指定id的shows -->
+	<update id="updateShowsById">
+		update orders set shows=#{shows} where id=#{id}
+	</update>
+	
+	<!-- 按统计总记录数 -->
+    <select id="getRowCount" resultType="int">
+            select count(*) from orders where shows=#{shows}
+    </select>
+</mapper>
+
+
+

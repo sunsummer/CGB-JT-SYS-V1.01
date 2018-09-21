@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jt.sys.dao.SysRoleDao">
+	
+	
+	<!-- 查询所有角色信息 -->
+	<select id="findObject" resultType="com.jt.common.vo.CheckBox">
+		select id,name from sys_roles
+	</select>
+	
+	<!-- 将橘色信息写入到数据库
+		1. useGeneratedKeys="true" 表示要使用写入到表中的主键(获取主键值)
+		2. keyProperty="id" 表示将写入数据库中的主键值再赋予id  -->
+	<insert id="insertObject" 
+		parameterType="com.jt.sys.entity.SysRole"
+		useGeneratedKeys="true"
+		keyProperty="id">
+		<!-- 
+		<selectKey keyProperty="id" order="BEFORE">
+			select uuid
+		</selectKey>
+		 -->
+		insert into sys_roles 
+         (id,name,note,createdTime,modifiedTime,
+         createdUser,modifiedUser) 
+         values
+         (null,#{name},#{note},now(),now(),
+         #{createdUser},#{modifiedUser})
+	</insert>
+	
+	<update id="updateObject" >
+		update sys_roles
+		set name=#{name},
+		note=#{note},
+		createdTime=now(),
+		modifiedTime=now(),
+		createdUser=#{createdUser},
+		modifiedUser=#{modifiedUser}
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteObject">
+		delete from sys_roles where id=#{id}
+	</delete>
+	
+	<select id="findRoleAll" resultType="com.jt.sys.entity.SysRole">
+		select * from sys_roles
+	</select>
+    
+    <!-- mybatis中通过sql标签定义SQL共性 -->
+    <sql id="queryWhereId">
+        <where>
+          <if test="name!=null and name!=''">
+          name like concat('%',#{name},'%')
+          </if>
+        </where>
+    </sql>
+    
+    <!-- 分页查询当前页记录 -->
+    <select id="findPageObjects"
+            resultType="com.jt.sys.entity.SysRole">
+            select * 
+            from sys_roles
+            <include refid="queryWhereId"/>
+            order by id desc
+            limit #{startIndex},#{pageSize}
+    </select>
+    
+    <!-- 按条件统计总记录数 -->
+    <select id="getRowCount"
+            resultType="int">
+            select count(*)
+            from sys_roles
+            <include refid="queryWhereId"/>
+    </select>
+    
+    <resultMap type="com.jt.sys.vo.SysRoleMenuResult" 
+				id="roleMenuResult">
+		<!-- 关联映射 -->
+		<association property="role" javaType="com.jt.sys.entity.SysRole" >
+			<id 	property="id" column="id"/>
+			<result property="name" column="name"/>
+			<result property="note" column="note"/>
+		</association>
+		
+		<!-- 关联映射 -->
+		<collection property="menuIds" 
+			select="com.jt.sys.dao.SysRoleMenuDao.findMenuIdsByRoleId" 
+			column="id" >
+		</collection>
+	</resultMap>
+    
+    <select id="findObjectById"
+    	resultMap="roleMenuResult">
+         select *
+         from sys_roles
+         where id=#{id}
+    </select>
+    
+    
+    
+</mapper>
